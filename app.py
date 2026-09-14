@@ -51,7 +51,12 @@ worksheet_photo = st.file_uploader("📸 Take a photo or Upload Worksheet", type
 
 if worksheet_photo is not None:
     st.success("Worksheet photo captured successfully!")
+    
+    # कैमरे की फोटो को पढ़ने लायक बनाना
     image = Image.open(worksheet_photo)
+    
+    # 🚀 NEW SPEED BOOST: फोटो को तेज़ी से प्रोसेस करने के लिए उसे रीसाइज़ (हल्का) करना
+    image.thumbnail((1200, 1200))
     
     if st.button("🚀 Check Worksheet with AI & Generate Report"):
         if not student_name or student_class == "Select Class":
@@ -104,7 +109,6 @@ if worksheet_photo is not None:
                     pdf = FPDF()
                     pdf.add_page()
                     
-                    # फॉन्ट सेट करना
                     if os.path.exists(font_path):
                         pdf.add_font("HindiFont", fname=font_path)
                         pdf.set_font("HindiFont", size=16)
@@ -122,7 +126,6 @@ if worksheet_photo is not None:
                     pdf.cell(0, 10, f"Name: {student_name} | Class: {student_class} | Subject: {subject}", ln=True)
                     pdf.cell(0, 10, "-"*60, ln=True)
                     
-                    # हिंदी टेक्स्ट को लाइन-बाय-लाइन लिखना
                     for line in ai_feedback.split('\n'):
                         pdf.multi_cell(0, 8, line)
                         
@@ -141,22 +144,19 @@ if worksheet_photo is not None:
                     lines_to_draw.append((f"Name: {student_name} | Class: {student_class} | Subject: {subject}", 20))
                     lines_to_draw.append(("-"*70, 20))
                     
-                    # टेक्स्ट को इमेज के हिसाब से काटना (Wrap text)
                     for paragraph in ai_feedback.split('\n'):
                         wrapped = textwrap.wrap(paragraph, width=60)
                         for w in wrapped:
                             lines_to_draw.append((w, 20))
-                        lines_to_draw.append(("", 20)) # पैराग्राफ के बीच खाली जगह
+                        lines_to_draw.append(("", 20))
                         
                     lines_to_draw.append(("-"*70, 20))
                     lines_to_draw.append(("Admin: DILIP KUMAR AGGRAWAL, LECTURER, GSSS PALSANA", 18))
                     
-                    # इमेज की ऊंचाई (Height) तय करना
                     img_height = 100 + (len(lines_to_draw) * 32)
                     result_img = Image.new('RGB', (img_width, img_height), color='white')
                     draw = ImageDraw.Draw(result_img)
                     
-                    # इमेज में फॉन्ट लोड करना
                     try:
                         font_regular = ImageFont.truetype(font_path, 22)
                         font_bold = ImageFont.truetype(font_path, 28)
@@ -164,7 +164,6 @@ if worksheet_photo is not None:
                         font_regular = ImageFont.load_default()
                         font_bold = ImageFont.load_default()
                         
-                    # इमेज पर टेक्स्ट लिखना
                     y_text = 40
                     for text, size in lines_to_draw:
                         f = font_bold if size == 28 else font_regular
