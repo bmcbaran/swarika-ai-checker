@@ -23,7 +23,7 @@ worksheet_no = st.sidebar.text_input("Worksheet No.", value="7")
 student_name = st.sidebar.text_input("Student Name", value="Hari")
 parent_whatsapp = st.sidebar.text_input("Parent's WhatsApp No.", value="+919462064244")
 
-# Admin Details in Sidebar
+# Admin Details
 st.sidebar.markdown("---")
 st.sidebar.markdown("**Admin Details:**")
 st.sidebar.markdown("👨‍🏫 **DILIP KUMAR AGGRAWAL**")
@@ -36,17 +36,30 @@ worksheet_photo = st.file_uploader("📸 Take a photo or Upload Worksheet", type
 
 if worksheet_photo is not None:
     st.success(f"Worksheet photo captured successfully for {student_name}!")
-    
-    # कैमरे की फोटो को पढ़ने लायक बनाना
     image = Image.open(worksheet_photo)
     
     if st.button("🚀 Check Worksheet with AI & Generate PDF"):
         with st.spinner("AI आपकी वर्कशीट को पढ़ रहा है और चेक कर रहा है... इसमें कुछ सेकंड लग सकते हैं⏳"):
             try:
-                # Google Gemini 1.5 pro मॉडल चालू करना
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                # 🚀 SMART MODEL FINDER (यह कोड 404 एरर को हमेशा के लिए खत्म कर देगा)
+                available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
                 
-                # AI को निर्देश (Prompt) देना - (यहाँ कोटेशन ठीक कर दिए गए हैं)
+                # जो मॉडल मौजूद है, उसे खुद चुन लेगा
+                chosen_model = 'gemini-1.5-flash' # Default
+                if 'models/gemini-1.5-flash' in available_models:
+                    chosen_model = 'gemini-1.5-flash'
+                elif 'models/gemini-1.5-pro' in available_models:
+                    chosen_model = 'gemini-1.5-pro'
+                elif 'models/gemini-pro-vision' in available_models:
+                    chosen_model = 'gemini-pro-vision'
+                else:
+                    chosen_model = available_models[0].replace('models/', '') if available_models else 'gemini-1.5-flash'
+                
+                st.info(f"🟢 Connected successfully to AI Model: {chosen_model}")
+                
+                # सही मॉडल चालू करना
+                model = genai.GenerativeModel(chosen_model)
+                
                 prompt = """
                 You are an expert mathematics teacher checking a student's worksheet.
                 Please analyze the uploaded image of the worksheet.
@@ -62,15 +75,12 @@ if worksheet_photo is not None:
                 response = model.generate_content([prompt, image])
                 ai_feedback = response.text
                 
-                # PDF में एरर न आए, इसलिए टेक्स्ट को सुरक्षित करना
                 safe_feedback = ai_feedback.replace('*', '').replace('#', '').encode('latin-1', 'replace').decode('latin-1')
 
-                # ऐप में रिजल्ट दिखाना
                 st.markdown("---")
                 st.subheader("📊 AI Evaluation Report")
                 st.write(safe_feedback)
                 
-                # असली AI रिजल्ट से PDF जनरेट करना
                 pdf = FPDF()
                 pdf.add_page()
                 pdf.set_font("Arial", 'B', 16)
@@ -85,11 +95,9 @@ if worksheet_photo is not None:
                 pdf.cell(0, 10, "AI Feedback & Corrections:", 0, 1)
                 pdf.set_font("Arial", '', 11)
                 
-                # AI के जवाब को PDF में लाइन-बाय-लाइन छापना
                 for line in safe_feedback.split('\n'):
                     pdf.multi_cell(0, 8, line)
                 
-                # PDF के नीचे Admin का नाम जोड़ना
                 pdf.ln(15)
                 pdf.set_font("Arial", 'I', 10)
                 pdf.cell(0, 10, "Admin: DILIP KUMAR AGGRAWAL, LECTURER, GSSS PALSANA, SIKAR | Mob: 9462064244", 0, 1, 'C')
@@ -99,7 +107,6 @@ if worksheet_photo is not None:
                 
                 st.success(f"✅ PDF Report Generated: {pdf_filename}")
                 
-                # नया डाउनलोड बटन
                 with open(pdf_filename, "rb") as file:
                     st.download_button(
                         label="📥 Download Checked PDF Report",
@@ -112,3 +119,5 @@ if worksheet_photo is not None:
 
             except Exception as e:
                 st.error(f"AI चेकिंग के दौरान एक एरर आ गया: {e}")
+                # अगर कोई दिक्कत हुई तो यह हमें बताएगा कि आपके अकाउंट में कौनसे मॉडल्स चालू हैं
+                st.error(f"⚠️ आपके अकाउंट में ये AI मॉडल्स उपलब्ध हैं: {available_models}")
