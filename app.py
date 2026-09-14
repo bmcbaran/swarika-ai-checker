@@ -14,7 +14,7 @@ st.set_page_config(page_title="Swarika AI Checker", page_icon="📝")
 st.title("📝 Swarika Playtime - AI Workbook Checker")
 st.write("Active AI Worksheet Checking System (Powered by Gemini Vision)")
 
-# Sidebar Details (डिफ़ॉल्ट वैल्यू हटा दी गई हैं, अब बॉक्स खाली आएंगे)
+# Sidebar Details
 st.sidebar.header("📋 Student Details")
 school_name = st.sidebar.text_input("School Name", value="", placeholder="Enter School Name")
 student_class = st.sidebar.selectbox("Class", ["Select Class", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10"])
@@ -39,48 +39,56 @@ if worksheet_photo is not None:
     image = Image.open(worksheet_photo)
     
     if st.button("🚀 Check Worksheet with AI & Generate PDF"):
-        # चेक करना कि नाम और क्लास भरी है या नहीं
         if not student_name or student_class == "Select Class":
             st.warning("⚠️ कृपया साइडबार में स्टूडेंट का नाम और क्लास भरें!")
         else:
             with st.spinner("AI आपकी वर्कशीट को पढ़ रहा है और चेक कर रहा है... इसमें कुछ सेकंड लग सकते हैं⏳"):
                 try:
-                    # 🚀 SMART MODEL FINDER (Updated for Gemini 3.6 Flash)
+                    # 🚀 AUTO-DYNAMIC MODEL FINDER
                     available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
                     
-                    chosen_model = 'gemini-3.6-flash' # नया सबसे तेज़ मॉडल
-                    if 'models/gemini-3.6-flash' in available_models:
-                        chosen_model = 'gemini-3.6-flash'
-                    elif 'models/gemini-3.7-flash' in available_models:
-                        chosen_model = 'gemini-3.7-flash'
-                    elif 'models/gemini-flash-latest' in available_models:
+                    if 'models/gemini-flash-latest' in available_models:
                         chosen_model = 'gemini-flash-latest'
                     else:
-                        chosen_model = available_models[0].replace('models/', '') if available_models else 'gemini-3.6-flash'
+                        flash_models = [m for m in available_models if 'flash' in m and 'preview' not in m and 'lite' not in m]
+                        if flash_models:
+                            chosen_model = sorted(flash_models)[-1].replace('models/', '')
+                        elif available_models:
+                            chosen_model = available_models[-1].replace('models/', '')
+                        else:
+                            chosen_model = 'gemini-1.5-flash'
                     
-                    st.info(f"🟢 Connected successfully to AI Model: {chosen_model}")
+                    st.info(f"🟢 Connected dynamically to model: **{chosen_model}**")
                     
                     model = genai.GenerativeModel(chosen_model)
                     
+                    # 🎯 यहाँ हमने भाषा का निर्देश (Prompt) बदल दिया है
                     prompt = """
-                    You are an expert mathematics teacher checking a student's worksheet.
+                    You are an expert teacher checking a student's worksheet.
                     Please analyze the uploaded image of the worksheet.
                     1. Identify the questions and the student's answers.
                     2. Check if the answers are correct or incorrect.
                     3. Provide a brief step-by-step solution for incorrect answers or a confirmation for correct ones.
-                    4. Give a final score based on correct answers out of total questions.
+                    4. Give a final score.
                     
-                    IMPORTANT: Please provide the output ONLY in plain English text. Do NOT use emojis, bold (**), symbols, or special characters. Keep the text simple so it can be printed easily in a PDF.
+                    CRITICAL LANGUAGE INSTRUCTION:
+                    You MUST respond in the EXACT SAME LANGUAGE that is used in the worksheet. 
+                    - If the worksheet is in Hindi, your entire feedback MUST be in proper Hindi language.
+                    - If the worksheet is in English, reply in English.
+                    
+                    IMPORTANT: Do NOT use emojis, bold (**), symbols, or special characters. Keep the text simple.
                     """
                     
                     response = model.generate_content([prompt, image])
-                    ai_feedback = response.text
+                    ai_feedback = response.text.replace('*', '').replace('#', '')
                     
-                    safe_feedback = ai_feedback.replace('*', '').replace('#', '').encode('latin-1', 'replace').decode('latin-1')
-
+                    # ऐप की स्क्रीन पर रिजल्ट दिखाना (यहाँ बिल्कुल सही हिंदी दिखेगी)
                     st.markdown("---")
                     st.subheader("📊 AI Evaluation Report")
-                    st.write(safe_feedback)
+                    st.write(ai_feedback)
+                    
+                    # PDF जनरेट करने का कोड
+                    safe_feedback = ai_feedback.encode('latin-1', 'replace').decode('latin-1')
                     
                     pdf = FPDF()
                     pdf.add_page()
@@ -120,4 +128,3 @@ if worksheet_photo is not None:
 
                 except Exception as e:
                     st.error(f"AI चेकिंग के दौरान एक एरर आ गया: {e}")
-                    st.error(f"⚠️ आपके अकाउंट में ये AI मॉडल्स उपलब्ध हैं: {available_models}")
