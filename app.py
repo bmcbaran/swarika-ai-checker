@@ -36,7 +36,7 @@ if worksheet_photo is not None:
     if st.button("🚀 Check Worksheet with AI & Generate PDF"):
         with st.spinner("AI आपकी वर्कशीट को पढ़ रहा है और चेक कर रहा है... इसमें कुछ सेकंड लग सकते हैं⏳"):
             try:
-                # Google Gemini 1.5 Flash (Vision) मॉडल चालू करना
+                # Google Gemini 1.5 pro (Vision) मॉडल चालू करना
                model = genai.GenerativeModel('gemini-1.5-pro')
                 
                 # AI को निर्देश (Prompt) देना
