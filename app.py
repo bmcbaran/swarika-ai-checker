@@ -44,7 +44,7 @@ if worksheet_photo is not None:
         with st.spinner("AI आपकी वर्कशीट को पढ़ रहा है और चेक कर रहा है... इसमें कुछ सेकंड लग सकते हैं⏳"):
             try:
                 # Google Gemini 1.5 pro मॉडल चालू करना
-                model = genai.GenerativeModel('gemini-1.5-pro')
+                model = genai.GenerativeModel('gemini-1.5-flash')
                 
                 # AI को निर्देश (Prompt) देना - (यहाँ कोटेशन ठीक कर दिए गए हैं)
                 prompt = """
