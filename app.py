@@ -40,7 +40,7 @@ if worksheet_photo is not None:
                model = genai.GenerativeModel('gemini-1.5-pro')
                 
                 # AI को निर्देश (Prompt) देना
-                prompt ="""
+                prompt =""
                 You are an expert mathematics teacher checking a student's worksheet.
                 Please analyze the uploaded image of the worksheet.
                 1. Identify the questions and the student's answers.
