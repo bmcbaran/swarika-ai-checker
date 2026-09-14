@@ -23,6 +23,13 @@ worksheet_no = st.sidebar.text_input("Worksheet No.", value="7")
 student_name = st.sidebar.text_input("Student Name", value="Hari")
 parent_whatsapp = st.sidebar.text_input("Parent's WhatsApp No.", value="+919462064244")
 
+# Admin Details in Sidebar
+st.sidebar.markdown("---")
+st.sidebar.markdown("**Admin Details:**")
+st.sidebar.markdown("👨‍🏫 **DILIP KUMAR AGGRAWAL**")
+st.sidebar.markdown("🏫 LECTURER, GSSS PALSANA, SIKAR")
+st.sidebar.markdown("📞 Mobile No: 9462064244")
+
 # Camera Section
 st.subheader("📸 Capture Worksheet Photo")
 worksheet_photo = st.file_uploader("📸 Take a photo or Upload Worksheet", type=['jpg', 'jpeg', 'png'])
@@ -36,11 +43,11 @@ if worksheet_photo is not None:
     if st.button("🚀 Check Worksheet with AI & Generate PDF"):
         with st.spinner("AI आपकी वर्कशीट को पढ़ रहा है और चेक कर रहा है... इसमें कुछ सेकंड लग सकते हैं⏳"):
             try:
-                # Google Gemini 1.5 pro (Vision) मॉडल चालू करना
-               model = genai.GenerativeModel('gemini-1.5-pro')
+                # Google Gemini 1.5 pro मॉडल चालू करना
+                model = genai.GenerativeModel('gemini-1.5-pro')
                 
-                # AI को निर्देश (Prompt) देना
-                prompt =""
+                # AI को निर्देश (Prompt) देना - (यहाँ कोटेशन ठीक कर दिए गए हैं)
+                prompt = """
                 You are an expert mathematics teacher checking a student's worksheet.
                 Please analyze the uploaded image of the worksheet.
                 1. Identify the questions and the student's answers.
@@ -81,7 +88,12 @@ if worksheet_photo is not None:
                 # AI के जवाब को PDF में लाइन-बाय-लाइन छापना
                 for line in safe_feedback.split('\n'):
                     pdf.multi_cell(0, 8, line)
-                    
+                
+                # PDF के नीचे Admin का नाम जोड़ना
+                pdf.ln(15)
+                pdf.set_font("Arial", 'I', 10)
+                pdf.cell(0, 10, "Admin: DILIP KUMAR AGGRAWAL, LECTURER, GSSS PALSANA, SIKAR | Mob: 9462064244", 0, 1, 'C')
+
                 pdf_filename = f"{student_name}_Worksheet_{worksheet_no}_AI_Checked.pdf"
                 pdf.output(pdf_filename)
                 
