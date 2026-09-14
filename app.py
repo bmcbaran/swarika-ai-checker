@@ -25,7 +25,7 @@ parent_whatsapp = st.sidebar.text_input("Parent's WhatsApp No.", value="+9194620
 
 # Camera Section
 st.subheader("📸 Capture Worksheet Photo")
-worksheet_photo = st.camera_input("Take a photo of the filled worksheet")
+worksheet_photo = st.file_uploader("📸 Take a photo or Upload Worksheet", type=['jpg', 'jpeg', 'png'])
 
 if worksheet_photo is not None:
     st.success(f"Worksheet photo captured successfully for {student_name}!")
